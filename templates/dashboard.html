@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}My Tickets{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-0">My Tickets</h4>
+        <p class="text-muted small mb-0">Track your support requests</p>
+    </div>
+    <a href="{{ url_for('customer.create_ticket') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i> New Ticket
+    </a>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card stat-card p-3 text-center">
+            <div class="fs-2 fw-bold text-warning">{{ stats.open }}</div>
+            <div class="text-muted small">Open</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card stat-card p-3 text-center">
+            <div class="fs-2 fw-bold text-primary">{{ stats.in_progress }}</div>
+            <div class="text-muted small">In Progress</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card stat-card p-3 text-center">
+            <div class="fs-2 fw-bold text-success">{{ stats.resolved }}</div>
+            <div class="text-muted small">Resolved</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card stat-card p-3 text-center">
+            <div class="fs-2 fw-bold text-secondary">{{ stats.closed }}</div>
+            <div class="text-muted small">Closed</div>
+        </div>
+    </div>
+</div>
+
+<!-- Ticket List -->
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        {% if tickets %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Ticket #</th>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Replies</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in tickets %}
+                    <tr class="ticket-row"
+                        onclick="window.location='{{ url_for('customer.view_ticket', ticket_id=t.id) }}'">
+                        <td><span class="badge bg-light text-dark border">{{ t.ticket_number }}</span></td>
+                        <td class="fw-semibold">{{ t.title }}</td>
+                        <td><span class="text-capitalize text-muted small">{{ t.category }}</span></td>
+                        <td>
+                            <span class="badge badge-priority-{{ t.priority }} text-uppercase small">
+                                {{ t.priority }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if t.status == 'open' %}
+                                <span class="badge bg-warning text-dark">Open</span>
+                            {% elif t.status == 'in_progress' %}
+                                <span class="badge bg-primary">In Progress</span>
+                            {% elif t.status == 'resolved' %}
+                                <span class="badge bg-success">Resolved</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Closed</span>
+                            {% endif %}
+                        </td>
+                        <td><span class="text-muted small">{{ t.reply_count }}</span></td>
+                        <td><span class="text-muted small">{{ t.created_at.strftime('%d %b %Y') }}</span></td>
+                    </>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-ticket-detailed fs-1 text-muted"></i>
+            <p class="text-muted mt-2">No tickets yet. <a href="{{ url_for('customer.create_ticket') }}">Create one</a></p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,6 @@
+AI SUPPORT TICKET SYSTEM
+
+
+SMPT MAIL; gowtham.supportai.com
+SMTP PASSWORD; Sri_Gowtham*7
+MySQL ps:Gowtham*7
