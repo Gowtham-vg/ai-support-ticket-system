@@ -2,38 +2,293 @@
 {% block title %}Login - SupportAI{% endblock %}
 
 {% block auth_content %}
-<div class="min-vh-100 d-flex align-items-center justify-content-center" style="background:#f4f6fb;">
-    <div class="card shadow-sm border-0" style="width:400px;border-radius:16px;">
-        <div class="card-body p-4">
+
+<style>
+.login-page{
+    min-height:100vh;
+    background:linear-gradient(135deg,#0f172a,#1e293b,#312e81);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    position:relative;
+}
+
+.login-page::before{
+    content:'';
+    position:absolute;
+    width:500px;
+    height:500px;
+    background:rgba(99,102,241,.18);
+    border-radius:50%;
+    top:-150px;
+    left:-120px;
+    filter:blur(70px);
+}
+
+.login-page::after{
+    content:'';
+    position:absolute;
+    width:450px;
+    height:450px;
+    background:rgba(59,130,246,.18);
+    border-radius:50%;
+    bottom:-120px;
+    right:-120px;
+    filter:blur(70px);
+}
+
+.login-wrapper{
+    width:100%;
+    max-width:1200px;
+    display:grid;
+    grid-template-columns:1fr 520px;
+}
+
+.login-left{
+    color:white;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+}
+
+.login-left h1{
+    font-size:3.2rem;
+    font-weight:800;
+    line-height:1.15;
+    letter-spacing:-0.5px;
+}
+
+.login-left p{
+    font-size:1.1rem;
+    color:rgba(255,255,255,.75);
+    max-width:500px;
+}
+
+.feature-box{
+    margin-top:40px;
+    display:flex;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+.feature-item{
+    background:rgba(255,255,255,.08);
+    backdrop-filter:blur(12px);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:14px;
+    padding:14px 18px;
+    color:white;
+}
+
+.login-card{
+    background:rgba(255,255,255,.95);
+    backdrop-filter:blur(20px);
+    border:none;
+    border-radius:28px;
+    padding:40px;
+    box-shadow:0 25px 60px rgba(0,0,0,.25);
+    color:#0f172a;
+
+    animation:fadeInUp .6s ease;
+}
+
+@keyframes fadeInUp{
+    from{
+        opacity:0;
+        transform:translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+.logo-circle{
+    width:80px;
+    height:80px;
+    margin:auto;
+    border-radius:20px;
+    background:linear-gradient(135deg,#4f46e5,#6366f1);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+    font-size:2rem;
+}
+
+.form-control{
+    height:52px;
+    border-radius:12px;
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    padding-left:14px;
+    transition:.2s;
+
+    color:#0f172a; /* 🔥 THIS FIXES TEXT VISIBILITY */
+}
+.form-control::placeholder{
+    color:#94a3b8;
+}
+
+.form-control:focus{
+    border-color:#6366f1;
+    box-shadow:0 0 0 .2rem rgba(99,102,241,.2);
+    background:white;
+    color:#0f172a;
+}
+
+.btn-login{
+    height:52px;
+    border:none;
+    border-radius:14px;
+    background:linear-gradient(135deg,#4f46e5,#6366f1);
+    color:white;
+    font-weight:600;
+    transition:.25s ease;
+}
+
+.btn-login:hover{
+    transform:translateY(-2px);
+    box-shadow:0 10px 25px rgba(79,70,229,.3);
+    .text-center a{
+    text-decoration:none;
+    transition:.2s ease;
+}
+
+.text-center a:hover{
+    color:#4f46e5;
+    text-decoration:underline;
+}
+}
+@media(max-width:992px){
+
+    .login-wrapper{
+        grid-template-columns:1fr;
+    }
+
+    .login-left{
+        display:none;
+    }
+
+    .login-card{
+        max-width:450px;
+        margin:auto;
+    }
+}
+
+</style>
+
+<div class="login-page">
+
+    <div class="login-wrapper">
+
+        <!-- Left Side -->
+
+        <div class="login-left">
+
+            <h1>
+                Smart Support.<br>
+                Faster Resolution.
+            </h1>
+
+            <p>
+                AI-powered support ticket management platform for customers,
+                agents and administrators. Track issues, collaborate efficiently
+                and resolve tickets faster.
+            </p>
+
+            <div class="feature-box">
+                <div class="feature-item">
+                    <i class="bi bi-robot me-2"></i>
+                    AI Draft Replies
+                </div>
+
+                <div class="feature-item">
+                    <i class="bi bi-lightning-charge me-2"></i>
+                    Faster Resolution
+                </div>
+
+                <div class="feature-item">
+                    <i class="bi bi-shield-check me-2"></i>
+                    Secure Workflow
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Login Card -->
+
+        <div class="login-card">
+         
+
             <div class="text-center mb-4">
-                <i class="bi bi-headset fs-1 text-primary"></i>
-                <h4 class="fw-bold mt-2 mb-0">SupportAI</h4>
-                <p class="text-muted small">Sign in to your account</p>
+
+                <div class="logo-circle mb-3">
+                    <i class="bi bi-stars"></i>
+                </div>
+
+                <h3 class="fw-bold mb-1">
+                    Welcome Back
+                </h3>
+
+                <p class="text-muted">
+                    Sign in to continue to SupportAI
+                </p>
+
             </div>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} py-2 small">{{ message }}</div>
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
                 {% endfor %}
             {% endwith %}
 
             <form method="POST">
+
                 <div class="mb-3">
-                    <label class="form-label fw-semibold small">Email</label>
-                    <input type="email" name="email" class="form-control" placeholder="you@example.com" required>
+                    <label class="form-label fw-semibold">
+                        Email Address
+                    </label>
+                    <input
+                        type="email"
+                        name="email"
+                        class="form-control"
+                        placeholder="you@example.com"
+                        required>
                 </div>
+
                 <div class="mb-4">
-                    <label class="form-label fw-semibold small">Password</label>
-                    <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                    <label class="form-label fw-semibold">
+                        Password
+                    </label>
+                    <input
+                        type="password"
+                        name="password"
+                        class="form-control"
+                        placeholder="Enter password"
+                        required>
                 </div>
-                <button type="submit" class="btn btn-primary w-100 fw-semibold">Sign In</button>
+
+                <button type="submit" class="btn btn-login w-100">
+                    Sign In
+                </button>
+
             </form>
 
-            <p class="text-center text-muted small mt-3">
-                Don't have an account? 
-                <a href="{{ url_for('auth.register') }}" class="text-primary">Register</a>
+            <p class="text-center text-muted mt-4 mb-0">
+                Don't have an account?
+                <a href="{{ url_for('auth.register') }}">
+                    Register
+                </a>
             </p>
+
         </div>
+
     </div>
+
 </div>
+
 {% endblock %}

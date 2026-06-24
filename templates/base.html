@@ -6,65 +6,199 @@
     <title>{% block title %}Support Tickets{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #f4f6fb; }
-        .sidebar {
-            min-height: 100vh;
-            width: 240px;
-            background: #1e2a3a;
-            position: fixed;
-            top: 0; left: 0;
-            padding-top: 20px;
-            z-index: 100;
-        }
-        .sidebar .brand {
-            color: #fff;
-            font-weight: 700;
-            font-size: 1.1rem;
-            padding: 12px 20px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            margin-bottom: 10px;
-        }
-        .sidebar .nav-link {
-            color: rgba(255,255,255,0.7);
-            padding: 10px 20px;
-            border-radius: 6px;
-            margin: 2px 10px;
-            font-size: 0.9rem;
-        }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active {
-            background: rgba(255,255,255,0.12);
-            color: #fff;
-        }
-        .sidebar .nav-link i { margin-right: 8px; }
-        .main-content {
-            margin-left: 240px;
-            padding: 30px;
-            min-height: 100vh;
-        }
-        .topbar {
-            background: #fff;
-            border-bottom: 1px solid #e0e4ef;
-            padding: 12px 30px;
-            margin-left: 240px;
-            position: sticky;
-            top: 0;
-            z-index: 99;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .badge-priority-low { background-color: #198754; }
-        .badge-priority-medium { background-color: #0d6efd; }
-        .badge-priority-high { background-color: #fd7e14; }
-        .badge-priority-urgent { background-color: #dc3545; }
-        .stat-card {
-            border-radius: 12px;
-            border: none;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        }
-        .ticket-row:hover { background-color: #f0f4ff; cursor: pointer; }
-    </style>
+:root{
+    --primary:#4f46e5;
+    --primary-hover:#4338ca;
+    --sidebar:#111827;
+    --border:#e5e7eb;
+}
+
+*{
+    transition:all .25s ease;
+}
+
+body{
+    font-family:'Inter',sans-serif;
+    background:#f8fafc;
+    overflow-x:hidden;
+}
+
+/* Sidebar */
+
+.sidebar{
+    min-height:100vh;
+    width:250px;
+    background:linear-gradient(180deg,#111827,#1f2937);
+    position:fixed;
+    top:0;
+    left:0;
+    padding-top:20px;
+    z-index:100;
+    box-shadow:8px 0 30px rgba(0,0,0,.08);
+}
+
+.sidebar .brand{
+    color:#fff;
+    font-weight:700;
+    font-size:1.2rem;
+    padding:18px 22px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    margin-bottom:10px;
+}
+
+.sidebar .nav-link{
+    color:rgba(255,255,255,.75);
+    padding:12px 16px;
+    border-radius:12px;
+    margin:4px 10px;
+    font-weight:500;
+}
+
+.sidebar .nav-link:hover{
+    color:white;
+    background:rgba(255,255,255,.08);
+    transform:translateX(4px);
+}
+
+.sidebar .nav-link.active{
+    color:white;
+    background:linear-gradient(135deg,#4f46e5,#6366f1);
+    box-shadow:0 10px 20px rgba(79,70,229,.25);
+}
+
+.sidebar .nav-link i{
+    margin-right:8px;
+}
+
+/* Topbar */
+
+.topbar{
+    background:rgba(255,255,255,.95);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+    padding:15px 30px;
+    margin-left:250px;
+    position:sticky;
+    top:0;
+    z-index:99;
+}
+
+/* Main */
+
+.main-content{
+    margin-left:250px;
+    padding:30px;
+    min-height:100vh;
+    animation:fadeUp .4s ease;
+}
+
+/* Cards */
+
+.card{
+    border:none !important;
+    border-radius:18px !important;
+    box-shadow:0 8px 25px rgba(15,23,42,.05);
+}
+
+.card:hover{
+    transform:translateY(-3px);
+    box-shadow:0 16px 35px rgba(15,23,42,.08);
+}
+
+/* Buttons */
+
+.btn{
+    border-radius:12px;
+    font-weight:600;
+}
+
+.btn:hover{
+    transform:translateY(-2px);
+}
+
+/* Forms */
+
+.form-control,
+.form-select{
+    border-radius:12px;
+}
+
+.form-control:focus,
+.form-select:focus{
+    border-color:#4f46e5;
+    box-shadow:0 0 0 .2rem rgba(79,70,229,.15);
+}
+
+/* Alerts */
+
+.alert{
+    border:none;
+    border-radius:14px;
+}
+
+/* Priority */
+
+.badge-priority-low{
+    background:#22c55e;
+}
+
+.badge-priority-medium{
+    background:#3b82f6;
+}
+
+.badge-priority-high{
+    background:#f97316;
+}
+
+.badge-priority-urgent{
+    background:#ef4444;
+    animation:pulse 2s infinite;
+}
+
+/* Table */
+
+.ticket-row:hover{
+    background:#f8faff;
+}
+
+/* Scrollbar */
+
+::-webkit-scrollbar{
+    width:8px;
+}
+
+::-webkit-scrollbar-thumb{
+    background:#cbd5e1;
+    border-radius:20px;
+}
+
+/* Animations */
+
+@keyframes fadeUp{
+    from{
+        opacity:0;
+        transform:translateY(10px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+@keyframes pulse{
+    0%{
+        box-shadow:0 0 0 0 rgba(239,68,68,.5);
+    }
+    70%{
+        box-shadow:0 0 0 12px rgba(239,68,68,0);
+    }
+    100%{
+        box-shadow:0 0 0 0 rgba(239,68,68,0);
+    }
+}
+</style>
     {% block head %}{% endblock %}
 </head>
 <body>
@@ -73,8 +207,7 @@
 <!-- Sidebar -->
 <div class="sidebar">
     <div class="brand">
-        <i class="bi bi-headset"></i> SupportAI
-    </div>
+<i class="bi bi-stars"></i> SupportAI    </div>
     <nav class="nav flex-column">
         {% if session.role == 'customer' %}
             <a class="nav-link {% if request.endpoint == 'customer.dashboard' %}active{% endif %}"
@@ -122,7 +255,9 @@
 <div class="topbar">
     <span class="fw-semibold text-secondary">{{ self.title() }}</span>
     <div class="d-flex align-items-center gap-2">
-        <span class="badge bg-secondary text-capitalize">{{ session.role }}</span>
+        <span class="badge rounded-pill bg-primary px-3 py-2 text-capitalize">
+    {{ session.role }}
+</span>
         <span class="text-muted small">{{ session.name }}</span>
     </div>
 </div>

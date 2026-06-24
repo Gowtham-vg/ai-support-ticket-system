@@ -95,7 +95,7 @@ def dashboard():
 }
 
     return render_template(
-    'dashboard.html',
+    'admin_dashboard.html',
     stats=stats,
     tickets=recent_tickets
 )
