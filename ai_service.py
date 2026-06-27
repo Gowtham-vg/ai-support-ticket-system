@@ -4,31 +4,71 @@ from openai import OpenAI
 
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY', ''))
 
-def classify_ticket(title, description):
-    text = (title + " " + description).lower()
+def classify_ticket(title: str, description: str) -> dict:
+    """
+    Classifies a support ticket using GPT-4o-mini.
+    Returns category, priority, and token usage.
+    """
+    prompt = f"""You are a support ticket classification system. Classify the following support ticket.
 
-    if any(word in text for word in ["down", "server", "crash", "critical"]):
+Ticket Title: {title}
+Ticket Description: {description}
+
+Respond with ONLY a JSON object (no markdown, no explanation) in this exact format:
+{{
+    "category": "<one of: technical, billing, general, feature_request, other>",
+    "priority": "<one of: low, medium, high, urgent>"
+}}
+
+Guidelines:
+- technical: system issues, bugs, errors, crashes, network problems
+- billing: payment, refund, invoice, subscription issues  
+- feature_request: new feature suggestions or enhancements
+- general: general inquiries, how-to questions
+- other: anything that doesn't fit above
+- urgent: system down, data loss, security breach
+- high: major functionality broken, billing disputes
+- medium: partial issues, general problems
+- low: minor issues, feature requests, questions"""
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=60,
+            temperature=0
+        )
+
+        raw = response.choices[0].message.content.strip()
+        result = json.loads(raw)
+
+        valid_categories = ['technical', 'billing', 'general', 'feature_request', 'other']
+        valid_priorities = ['low', 'medium', 'high', 'urgent']
+
+        category = result.get('category', 'general')
+        priority = result.get('priority', 'medium')
+
+        if category not in valid_categories:
+            category = 'general'
+        if priority not in valid_priorities:
+            priority = 'medium'
+
         return {
-            "category": "technical",
-            "priority": "high",
-            "prompt_tokens": 0,
-            "completion_tokens": 0
+            'category': category,
+            'priority': priority,
+            'prompt_tokens': response.usage.prompt_tokens,
+            'completion_tokens': response.usage.completion_tokens
         }
 
-    if any(word in text for word in ["payment", "refund", "invoice"]):
-        return {
-            "category": "billing",
-            "priority": "high",
-            "prompt_tokens": 0,
-            "completion_tokens": 0
-        }
-
-    return {
-        "category": "general",
-        "priority": "medium",
-        "prompt_tokens": 0,
-        "completion_tokens": 0
-    }
+    except Exception as e:
+        print(f"[AI classify error] {e}")
+        # Fallback: rule-based if GPT fails
+        text = (title + " " + description).lower()
+        if any(word in text for word in ["down", "server", "crash", "critical", "error", "bug"]):
+            return {"category": "technical", "priority": "high", "prompt_tokens": 0, "completion_tokens": 0}
+        if any(word in text for word in ["payment", "refund", "invoice", "billing", "charge"]):
+            return {"category": "billing", "priority": "high", "prompt_tokens": 0, "completion_tokens": 0}
+        return {"category": "general", "priority": "medium", "prompt_tokens": 0, "completion_tokens": 0}
 def generate_draft_response(ticket_title: str, ticket_description: str, previous_responses: list) -> dict:
     """
     Generates a draft response for an agent using GPT-4o-mini.
