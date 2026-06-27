@@ -119,7 +119,7 @@ Others
 ## Installation
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Gowtham-vg/ai-support-ticket-system.git
 
 cd SupportAI
 
