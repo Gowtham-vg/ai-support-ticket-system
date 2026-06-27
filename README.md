@@ -80,9 +80,39 @@ Others
 
 ---
 
-## Project Screenshots
+## Screenshots
 
-(Add screenshots here)
+### Login
+
+![Login](screenshots/login.png)
+
+### Customer Dashboard
+
+![Customer Dashboard](screenshots/customer-dashboard.png)
+
+### Create Ticket
+
+![Create Ticket](screenshots/create-ticket.png)
+
+### Agent Dashboard
+
+![Agent Dashboard](screenshots/agent-dashboard.png)
+
+### Admin Dashboard
+
+![Admin Dashboard](screenshots/admin-dashboard.png)
+
+### Ticket Detail
+
+![Ticket Detail](screenshots/ticket-detail.png)
+
+### Admin Ticket Detail
+
+![Admin Ticket Detail](screenshots/admin-ticket-detail.png)
+
+### PDF Report
+
+![PDF Report](screenshots/pdf-report.png)
 
 ---
 
