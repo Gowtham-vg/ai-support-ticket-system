@@ -78,8 +78,14 @@ def create_ticket():
         """, (ticket_id, ai_result['prompt_tokens'], ai_result['completion_tokens'],
               f"category={ai_result['category']}, priority={ai_result['priority']}"))
 
+        cur.execute("""
+            INSERT INTO ticket_activity(ticket_id, action)
+        VALUES(%s, %s)
+    """, (
+    ticket_id,
+    "Ticket created"
+))
         mysql.connection.commit()
-        cur.close()
 
         # Send email notification
         notify_ticket_created(session['email'], session['name'], ticket_number, title)
@@ -90,34 +96,106 @@ def create_ticket():
     return render_template('create_ticket.html')
 
 
-@customer.route('/ticket/<int:ticket_id>')
+@customer.route('/ticket/<int:ticket_id>', methods=['GET', 'POST'])
 @role_required('customer')
 def view_ticket(ticket_id):
     cur = mysql.connection.cursor()
 
-    # Verify this ticket belongs to the logged-in customer
-    cur.execute("""
-        SELECT t.*, u.name as agent_name
-        FROM tickets t
-        LEFT JOIN users u ON u.id = t.assigned_agent_id
-        WHERE t.id = %s AND t.customer_id = %s
-    """, (ticket_id, session['user_id']))
-    ticket = cur.fetchone()
+    try:
+        # Verify this ticket belongs to the logged-in customer
+        cur.execute("""
+            SELECT
+                t.*,
+                c.name AS customer_name,
+                c.email AS customer_email,
+                a.name AS agent_name
+            FROM tickets t
+            JOIN users c
+                ON c.id = t.customer_id
+            LEFT JOIN users a
+                ON a.id = t.assigned_agent_id
+            WHERE t.id = %s
+            AND t.customer_id = %s
+        """, (ticket_id, session['user_id']))
 
-    if not ticket:
-        flash('Ticket not found.', 'danger')
+        ticket = cur.fetchone()
+
+        if not ticket:
+            flash('Ticket not found.', 'danger')
+            return redirect(url_for('customer.dashboard'))
+
+        # Customer reply
+        if request.method == "POST":
+
+            message = request.form.get("message", "").strip()
+
+            if not message:
+                flash("Reply cannot be empty.", "danger")
+
+            else:
+                cur.execute("""
+                    INSERT INTO responses
+                    (ticket_id, responder_id, message, is_internal_note)
+                    VALUES (%s, %s, %s, FALSE)
+                """, (
+                    ticket_id,
+                    session['user_id'],
+                    message
+                ))
+
+                cur.execute("""
+                    INSERT INTO ticket_activity(ticket_id, action)
+                    VALUES (%s, %s)
+                """, (
+                    ticket_id,
+                    "Customer replied"
+                ))
+
+                mysql.connection.commit()
+
+                notify_ticket_replied(
+                    ticket['customer_email'],
+                    ticket['customer_name'],
+                    ticket['ticket_number'],
+                    ticket['title'],
+                    message
+                )
+
+                flash("Reply sent successfully.", "success")
+
+                return redirect(
+                    url_for(
+                        'customer.view_ticket',
+                        ticket_id=ticket_id
+                    )
+                )
+
+        # Get responses
+        cur.execute("""
+            SELECT r.*, u.name AS responder_name, u.role AS responder_role
+            FROM responses r
+            JOIN users u ON u.id = r.responder_id
+            WHERE r.ticket_id = %s
+            AND r.is_internal_note = FALSE
+            ORDER BY r.created_at ASC
+        """, (ticket_id,))
+        responses = cur.fetchall()
+
+        # Get timeline
+        cur.execute("""
+            SELECT action, created_at
+            FROM ticket_activity
+            WHERE ticket_id = %s
+            ORDER BY created_at DESC
+        """, (ticket_id,))
+        timeline = cur.fetchall()
+
+        return render_template(
+            'ticket_detail.html',
+            ticket=ticket,
+            responses=responses,
+            timeline=timeline
+        )
+
+    finally:
         cur.close()
-        return redirect(url_for('customer.dashboard'))
-
-    # Get responses (exclude internal notes)
-    cur.execute("""
-        SELECT r.*, u.name as responder_name, u.role as responder_role
-        FROM responses r
-        JOIN users u ON u.id = r.responder_id
-        WHERE r.ticket_id = %s AND r.is_internal_note = FALSE
-        ORDER BY r.created_at ASC
-    """, (ticket_id,))
-    responses = cur.fetchall()
-    cur.close()
-
-    return render_template('ticket_detail.html', ticket=ticket, responses=responses)

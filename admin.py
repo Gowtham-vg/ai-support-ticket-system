@@ -11,6 +11,18 @@ mysql = None
 def init_mysql(mysql_instance):
     global mysql
     mysql = mysql_instance
+def log_ticket_activity(ticket_id, action):
+    cur = mysql.connection.cursor()
+    try:
+
+        cur.execute("""
+        INSERT INTO ticket_activity (ticket_id, action)
+        VALUES (%s, %s)
+    """, (ticket_id, action))
+        mysql.connection.commit()
+    finally:
+
+        cur.close()
 
 
 @admin.route('/dashboard')
@@ -94,11 +106,14 @@ def dashboard():
     'closed': ticket_stats['closed_count'] or 0
 }
 
-    return render_template(
-    'admin_dashboard.html',
+    return render_template("admin_dashboard.html",
     stats=stats,
-    tickets=recent_tickets
-)
+    tickets=recent_tickets,
+    by_priority=by_priority,
+    by_category=by_category,
+    daily_trend=daily_trend,)
+    
+
 
 
 @admin.route('/users')
@@ -160,6 +175,7 @@ def toggle_user(user_id):
 @admin.route('/tickets')
 @role_required('admin')
 def all_tickets():
+    search = request.args.get('search', '').strip()
     status_filter = request.args.get('status', '')
     priority_filter = request.args.get('priority', '')
 
@@ -169,8 +185,24 @@ def all_tickets():
         JOIN users u ON u.id = t.customer_id
         LEFT JOIN users a ON a.id = t.assigned_agent_id
         WHERE 1=1
+        
     """
     params = []
+
+    if search:
+        query += """
+         AND (
+             t.ticket_number LIKE %s
+             OR t.title LIKE %s
+             OR u.name LIKE %s
+        )
+    """
+        params.extend([
+         f"%{search}%",
+         f"%{search}%",
+         f"%{search}%"
+    ])
+    
 
     if status_filter:
         query += " AND t.status = %s"
@@ -193,21 +225,89 @@ def all_tickets():
     return render_template('tickets.html',
                            tickets=tickets,
                            agents=agents,
+                           search=search,
                            status_filter=status_filter,
                            priority_filter=priority_filter)
 
+@admin.route('/tickets/<int:ticket_id>')
+@role_required('admin')
+def ticket_detail(ticket_id):
+
+    cur = mysql.connection.cursor()
+
+    cur.execute("""
+        SELECT
+            t.*,
+            u.name AS customer_name,
+            u.email AS customer_email,
+            a.name AS agent_name
+        FROM tickets t
+        JOIN users u
+            ON u.id = t.customer_id
+        LEFT JOIN users a
+            ON a.id = t.assigned_agent_id
+        WHERE t.id = %s
+    """, (ticket_id,))
+
+    ticket = cur.fetchone()
+
+    if not ticket:
+        cur.close()
+        flash("Ticket not found.", "danger")
+        return redirect(url_for('admin.all_tickets'))
+    
+    # Timeline
+    cur.execute("""
+        SELECT action, created_at
+        FROM ticket_activity
+        WHERE ticket_id=%s
+        ORDER BY created_at DESC
+    """, (ticket_id,))
+
+    timeline = cur.fetchall()
+
+
+
+    #Agents
+    cur.execute("""
+        SELECT id, name
+        FROM users
+        WHERE role='agent'
+        AND is_active=TRUE
+    """)
+    agents = cur.fetchall()
+
+    cur.close()
+    
+    return render_template(
+        "admin_ticket_detail.html",
+        ticket=ticket,
+        agents=agents,
+        timeline=timeline
+    )
 
 @admin.route('/tickets/<int:ticket_id>/assign', methods=['POST'])
 @role_required('admin')
 def assign_ticket(ticket_id):
     agent_id = request.form.get('agent_id')
     cur = mysql.connection.cursor()
-    cur.execute("""
+    try:
+        cur.execute("""
         UPDATE tickets SET assigned_agent_id = %s, status = 'in_progress'
         WHERE id = %s
-    """, (agent_id, ticket_id))
-    mysql.connection.commit()
-    cur.close()
+         """, (agent_id, ticket_id))
+    # Get agent name
+        cur.execute("SELECT name FROM users WHERE id = %s", (agent_id,))
+        agent = cur.fetchone()
+
+    
+        log_ticket_activity(
+            ticket_id,
+            f"Ticket assigned to {agent['name']}"
+)
+        mysql.connection.commit()
+    finally:
+        cur.close()
     flash('Ticket assigned.', 'success')
     return redirect(url_for('admin.all_tickets'))
 

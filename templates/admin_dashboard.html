@@ -59,6 +59,45 @@
     </div>
 
 </div>
+<div class="row g-4 mb-4">
+
+    <div class="col-lg-6">
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-header bg-white fw-bold">
+                Ticket Status
+            </div>
+
+            <div class="card-body">
+
+                <canvas id="statusChart"></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-lg-6">
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-header bg-white fw-bold">
+                Priority Distribution
+            </div>
+
+            <div class="card-body">
+
+                <canvas id="priorityChart"></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 
 <!-- Recent Tickets -->
 
@@ -89,7 +128,7 @@
 
                 {% for t in tickets %}
 
-                    <tr onclick="window.location='{{ url_for('admin.all_tickets') }}'"
+                    <tr onclick="window.location='{{ url_for('admin.ticket_detail', ticket_id=t.id) }}'"
                         style="cursor:pointer;">
 
                         <td>{{ t.ticket_number }}</td>
@@ -117,5 +156,69 @@
     </div>
 
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+const statusChart = new Chart(
+    document.getElementById('statusChart'),
+    {
+        type: 'doughnut',
+        data: {
+            labels: [
+                'Open',
+                'In Progress',
+                'Resolved',
+                'Closed'
+            ],
+            datasets: [{
+                data: [
+                    {{ stats.open }},
+                    {{ stats.in_progress }},
+                    {{ stats.resolved }},
+                    {{ stats.closed }}
+                ]
+            }]
+        }
+    }
+);
+
+const priorityChart = new Chart(
+    document.getElementById('priorityChart'),
+    {
+        type: 'bar',
+        data: {
+            labels: [
+                'Urgent',
+                'High',
+                'Medium',
+                'Low'
+            ],
+            datasets: [{
+                label: 'Tickets',
+                data: [
+                    {% set urgent=0 %}
+                    {% set high=0 %}
+                    {% set medium=0 %}
+                    {% set low=0 %}
+
+                    {% for t in tickets %}
+                        {% if t.priority=='urgent' %}
+                            {% set urgent=urgent+1 %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {{ urgent }},
+                    {{ high }},
+                    {{ medium }},
+                    {{ low }}
+                ]
+            }]
+        }
+    }
+);
+
+</script>
 
 {% endblock %}

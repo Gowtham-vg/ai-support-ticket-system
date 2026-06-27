@@ -3,40 +3,70 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="fw-bold mb-0">All Tickets</h4>
+    <h4 class="fw-bold mb-0">
+    All Tickets
+    <span class="badge rounded-pill bg-dark-subtle text-dark ms-2">
+    {{ tickets|length }}
+</span>
+</h4>
     <a href="{{ url_for('admin.download_report') }}" class="btn btn-outline-danger btn-sm">
         <i class="bi bi-file-earmark-pdf me-1"></i> Download PDF Report
     </a>
 </div>
 
 <!-- Filters -->
-<div class="card border-0 shadow-sm mb-3 p-3">
-    <form method="GET" class="row g-2 align-items-end">
-        <div class="col-auto">
-            <label class="form-label small fw-semibold">Status</label>
-            <select name="status" class="form-select form-select-sm">
-                <option value="">All</option>
-                <option value="open" {% if status_filter == 'open' %}selected{% endif %}>Open</option>
-                <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress</option>
-                <option value="resolved" {% if status_filter == 'resolved' %}selected{% endif %}>Resolved</option>
-                <option value="closed" {% if status_filter == 'closed' %}selected{% endif %}>Closed</option>
-            </select>
-        </div>
-        <div class="col-auto">
-            <label class="form-label small fw-semibold">Priority</label>
-            <select name="priority" class="form-select form-select-sm">
-                <option value="">All</option>
-                <option value="urgent" {% if priority_filter == 'urgent' %}selected{% endif %}>Urgent</option>
-                <option value="high" {% if priority_filter == 'high' %}selected{% endif %}>High</option>
-                <option value="medium" {% if priority_filter == 'medium' %}selected{% endif %}>Medium</option>
-                <option value="low" {% if priority_filter == 'low' %}selected{% endif %}>Low</option>
-            </select>
-        </div>
-        <div class="col-auto">
-            <button type="submit" class="btn btn-primary btn-sm">Filter</button>
-            <a href="{{ url_for('admin.all_tickets') }}" class="btn btn-outline-secondary btn-sm ms-1">Clear</a>
-        </div>
-    </form>
+ <div class="card border-0 shadow-sm mb-4 p-3">
+
+<form method="GET" class="row g-3 align-items-end">
+
+    <div class="col-md-4">
+        <label class="form-label fw-semibold">Search</label>
+        <input
+            type="text"
+            name="search"
+            class="form-control"
+            placeholder="Ticket #, Title or Customer..."
+            value="{{ search }}">
+    </div>
+
+    <div class="col-md-2">
+        <label class="form-label fw-semibold">Status</label>
+        <select name="status" class="form-select">
+            <option value="">All</option>
+            <option value="open" {% if status_filter=='open' %}selected{% endif %}>Open</option>
+            <option value="in_progress" {% if status_filter=='in_progress' %}selected{% endif %}>In Progress</option>
+            <option value="resolved" {% if status_filter=='resolved' %}selected{% endif %}>Resolved</option>
+            <option value="closed" {% if status_filter=='closed' %}selected{% endif %}>Closed</option>
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <label class="form-label fw-semibold">Priority</label>
+        <select name="priority" class="form-select">
+            <option value="">All</option>
+            <option value="urgent" {% if priority_filter=='urgent' %}selected{% endif %}>Urgent</option>
+            <option value="high" {% if priority_filter=='high' %}selected{% endif %}>High</option>
+            <option value="medium" {% if priority_filter=='medium' %}selected{% endif %}>Medium</option>
+            <option value="low" {% if priority_filter=='low' %}selected{% endif %}>Low</option>
+        </select>
+    </div>
+
+    <div class="col-md-2 d-grid">
+        <button class="btn btn-primary">
+            <i class="bi bi-search me-1"></i>
+            Apply
+        </button>
+    </div>
+
+    <div class="col-md-2 d-grid">
+        <a href="{{ url_for('admin.all_tickets') }}"
+           class="btn btn-outline-secondary">
+            Clear
+        </a>
+    </div>
+
+</form>
+
 </div>
 
 <div class="card border-0 shadow-sm">
@@ -52,7 +82,15 @@
                 {% for t in tickets %}
                 <tr>
                     <td><span class="badge bg-light text-dark border">{{ t.ticket_number }}</span></td>
-                    <td class="fw-semibold small">{{ t.title[:35] }}{% if t.title|length > 35 %}...{% endif %}</td>
+                    <td class="fw-semibold small">
+    <a href="{{ url_for('admin.ticket_detail', ticket_id=t.id) }}"
+       class="text-decoration-none">
+
+        {{ t.title[:35] }}
+        {% if t.title|length > 35 %}...{% endif %}
+
+    </a>
+</td>
                     <td class="small text-muted">{{ t.customer_name }}</td>
                     <td class="small text-muted">{{ t.agent_name or 'Unassigned' }}</td>
                     <td><span class="badge badge-priority-{{ t.priority }} text-uppercase small">{{ t.priority }}</span></td>

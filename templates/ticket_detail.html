@@ -3,11 +3,8 @@
 
 {% block content %}
 <div class="mb-3">
-    {% if session.role == 'agent' %}
-    <a href="{{ url_for('agent.dashboard') }}"
-    {% else %}
-    <a href="{{ url_for('customer.dashboard') }}"
-    {% endif %}
+    <a href="{% if session.role == 'agent' %}{{ url_for('agent.dashboard') }}{% else %}{{ url_for('customer.dashboard') }}{% endif %}"
+       class="btn btn-outline-secondary">
         <i class="bi bi-arrow-left me-1"></i> Back
     </a>
 </div>
