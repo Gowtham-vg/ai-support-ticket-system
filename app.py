@@ -2,7 +2,6 @@ from flask import Flask
 from flask_mysqldb import MySQL
 from config import Config
 import ai_service
-print("AI FILE:", ai_service.__file__)
 # Import blueprints
 from auth import auth, init_mysql as auth_mysql
 from customer import customer, init_mysql as customer_mysql
