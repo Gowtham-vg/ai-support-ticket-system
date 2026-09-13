@@ -128,3 +128,6 @@ Please let us know if you have any additional information that may help us resol
         'prompt_tokens': 0,
         'completion_tokens': 0
     }
+
+# AI-assisted development note: 
+# Portions of this AI integration logic (OpenAI API calls for ticket # classification and priority detection) were developed with assistance # from Claude AI (Anthropic).
