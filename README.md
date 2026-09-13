@@ -149,3 +149,8 @@ python app.py
 ## Author
 
 **Gowtham Bhaskaran**
+---
+
+## Acknowledgments
+
+Parts of this project's development (debugging, code review, and documentation) were assisted using **Claude AI** by Anthropic.
